@@ -38,13 +38,45 @@
         btn.innerHTML = `<i data-lucide="loader"></i> Validating with Backend...`;
         
         try {
-            const res = await fetch(`${window.APEX?.apiBase || ''}/api/mfg/validate`, { method: 'POST' });
+            const fileInput = document.getElementById('stl-upload-input');
+            const file = fileInput && fileInput.files[0];
+            
+            if (!file) {
+                throw new Error("Please upload an STL file first.");
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const res = await fetch(`${window.APEX?.apiBase || ''}/api/mfg/slice`, { 
+                method: 'POST',
+                body: formData
+            });
+            
             const data = await res.json();
             
             if (data.status === 'success') {
-                msgEl.textContent = 'SUCCESS: Validation complete. Exporting payload...';
+                msgEl.textContent = 'SUCCESS: STL Sliced! Downloading G-Code...';
                 msgEl.style.color = 'var(--accent-green)';
                 msgEl.style.display = 'block';
+                
+                // Update console
+                const consoleEl = document.getElementById('gcode-console');
+                if (consoleEl) {
+                    consoleEl.value = data.gcode;
+                }
+                
+                // Download file
+                const blob = new Blob([data.gcode], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = data.filename || 'sliced.gcode';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
                 if (window.ConsoleLog) window.ConsoleLog.ok('Manufacturing Reliability checks passed. G-Code exported.');
             } else {
                 throw new Error(data.message);

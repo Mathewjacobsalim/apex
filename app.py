@@ -13,7 +13,7 @@ import math
 from bson.objectid import ObjectId
 
 # ── Auto Dependency Handler ───────────────────────────────────────────────
-required_libs = ["flask", "flask-cors", "requests", "beautifulsoup4", "python-dotenv", "google-generativeai", "pymavlink", "pyserial", "pymongo"]
+required_libs = ["flask", "flask-cors", "requests", "beautifulsoup4", "python-dotenv", "google-generativeai", "pymavlink", "pyserial", "pymongo", "trimesh", "numpy", "scipy"]
 for lib in required_libs:
     try:
         __import__(lib.replace("-", "_"))
@@ -604,16 +604,109 @@ def fc_calibrate(sensor):
         "estimated_duration": 4 if sensor == "compass" else 2
     })
 
-# ── Manufacturing Reliability Validation ───────────────────────────────────
-@app.route("/api/mfg/validate", methods=["POST"])
-def mfg_validate():
-    data = request.json or {}
-    # Simulate processing constraints
-    time.sleep(0.8)
-    return jsonify({
-        "status": "success",
-        "message": "All structural and tolerance checks passed. G-Code generated successfully."
-    })
+# ── Custom Slicing Engine (STL to G-Code) ───────────────────────────────────
+import io
+try:
+    import trimesh
+    import numpy as np
+except ImportError:
+    trimesh = None
+    np = None
+
+@app.route("/api/mfg/slice", methods=["POST"])
+def mfg_slice_stl():
+    if not trimesh:
+        return jsonify({"status": "error", "message": "trimesh or numpy not installed. Cannot slice STL."}), 500
+
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "No STL file uploaded."}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "Empty file."}), 400
+
+    try:
+        # Load mesh directly from file stream
+        mesh = trimesh.load(file, file_type='stl')
+        
+        if mesh.is_empty:
+            return jsonify({"status": "error", "message": "Invalid or empty STL file."}), 400
+
+        # Slicing parameters
+        layer_height = 0.2
+        nozzle_temp = 210
+        bed_temp = 60
+        feedrate = 3000  # mm/min
+        
+        # Get bounding box
+        z_min = float(mesh.bounds[0][2])
+        z_max = float(mesh.bounds[1][2])
+        
+        # Slicing sections
+        z_levels = np.arange(z_min + layer_height, z_max, layer_height)
+        sections = mesh.section_multiplane(plane_origin=[0,0,0], plane_normal=[0,0,1], heights=z_levels)
+
+        # Generate G-Code lines
+        gcode = []
+        gcode.append("; APEX-OS Python Custom Slicer V1.0")
+        gcode.append(f"; Model Dimensions: {mesh.extents[0]:.2f} x {mesh.extents[1]:.2f} x {mesh.extents[2]:.2f} mm")
+        gcode.append(f"; Layers: {len(z_levels)}, Layer Height: {layer_height}mm")
+        
+        # Start M-Codes
+        gcode.append("G21 ; Set units to millimeters")
+        gcode.append("G90 ; Use absolute coordinates")
+        gcode.append(f"M140 S{bed_temp} ; Set bed temperature")
+        gcode.append(f"M104 S{nozzle_temp} ; Set nozzle temperature")
+        gcode.append("G28 ; Home all axes")
+        gcode.append(f"M190 S{bed_temp} ; Wait for bed temperature")
+        gcode.append(f"M109 S{nozzle_temp} ; Wait for nozzle temperature")
+        gcode.append("G1 Z2.0 F3000 ; Move Z axis up little to prevent scratching of heat bed")
+        
+        extrude_dist = 0.0
+        
+        # Process toolpaths from sliced paths
+        for idx, section in enumerate(sections):
+            if section is None: continue
+            
+            z = z_levels[idx]
+            gcode.append(f"\\n; --- LAYER {idx} Z: {z:.2f} ---")
+            gcode.append(f"G1 Z{z:.2f} F{feedrate}")
+            
+            # Convert 3D path to 2D toolpaths
+            for entity in section.entities:
+                discrete = entity.discrete(section.vertices)
+                if len(discrete) == 0: continue
+                
+                # Move to start of contour
+                start_pt = discrete[0]
+                gcode.append(f"G0 X{start_pt[0]:.3f} Y{start_pt[1]:.3f} F{feedrate}")
+                
+                # Extrude along path
+                for pt in discrete[1:]:
+                    dist = np.linalg.norm(pt[:2] - start_pt[:2])
+                    extrude_dist += dist * 0.04  # Arbitrary extrusion multiplier
+                    gcode.append(f"G1 X{pt[0]:.3f} Y{pt[1]:.3f} E{extrude_dist:.4f} F{feedrate}")
+                    start_pt = pt
+
+        # End M-Codes
+        gcode.append("\\n; --- END OF PRINT ---")
+        gcode.append("M104 S0 ; Turn off extruder")
+        gcode.append("M140 S0 ; Turn off bed")
+        gcode.append("G28 X Y ; Home X and Y")
+        gcode.append("M84 ; Disable motors")
+
+        gcode_text = "\\n".join(gcode)
+        
+        return jsonify({
+            "status": "success",
+            "gcode": gcode_text,
+            "filename": file.filename.replace(".stl", ".gcode")
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": f"Slicing failed: {str(e)}"}), 500
 
 # ── SAP ERP S/4HANA Integration (Simulated) ────────────────────────────────
 @app.route("/api/sap/connect", methods=["POST"])

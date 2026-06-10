@@ -8,3 +8,6 @@ pymavlink
 pyserial
 pymongo
 gunicorn
+trimesh
+numpy
+scipy

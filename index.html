@@ -671,6 +671,12 @@ M30 ; Program end
                                 </div>
                             </div>
 
+                            <div style="border-top: 1px solid var(--border-color); padding-top:12px;">
+                                <label class="control-label">Upload 3D Model (STL)</label>
+                                <input type="file" id="stl-upload-input" accept=".stl" class="control-input" style="padding: 5px; font-size: 10px;">
+                                <div style="color: var(--text-secondary); font-size: 9px; margin-top: 4px;">Upload an STL to slice and generate G-Code toolpaths.</div>
+                            </div>
+
                             <button class="btn-primary" style="width: 100%; margin-top: auto;" id="btn-export-dxf">
                                 <i data-lucide="shield-check"></i> Validate &amp; Export G-Code
                             </button>
