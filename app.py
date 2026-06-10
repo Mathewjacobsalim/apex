@@ -709,6 +709,18 @@ def mfg_slice_stl():
         return jsonify({"status": "error", "message": f"Slicing failed: {str(e)}"}), 500
 
 # ── Admin Utilities ────────────────────────────────────────────────────────
+@app.route("/api/admin/login", methods=["POST"])
+def admin_login():
+    data = request.json or {}
+    user = data.get("username", "")
+    password = data.get("password", "")
+    
+    # Simple hardcoded authentication for the prototype
+    if user == "admin" and password == "password123":
+        return jsonify({"status": "success", "message": "Authentication successful"})
+    else:
+        return jsonify({"status": "error", "message": "Invalid username or password"}), 401
+
 @app.route("/api/admin/clear-db", methods=["DELETE"])
 def clear_db():
     if not IS_OFFLINE:
@@ -723,18 +735,18 @@ def clear_db():
         return jsonify({"status": "success", "message": "Offline mode: simulated clear."})
 
 
-# ── SAP ERP S/4HANA Integration (Simulated) ────────────────────────────────
-@app.route("/api/sap/connect", methods=["POST"])
-def sap_connect():
+# ── APEX Custom Team Sync Integration ──────────────────────────────────────
+@app.route("/api/team/connect", methods=["POST"])
+def team_connect():
     data = request.json or {}
-    host = data.get("host", "Unknown Host")
-    user = data.get("user", "Unknown User")
+    host = data.get("host", "Unknown API")
+    project = data.get("project", "Unknown Project")
     
     time.sleep(1.5)
     return jsonify({
         "status": "success",
-        "message": f"Connected to {host} as {user}",
-        "sap_version": "S/4HANA 2023"
+        "message": f"Successfully connected to {host} for project {project}",
+        "sync_status": "Active"
     })
 
 @app.route("/api/sap/sync_bom", methods=["POST"])

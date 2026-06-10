@@ -1184,34 +1184,56 @@ M30 ; Program end
 
             <!-- Admin & System Config Tab -->
             <section id="admin-tab" class="tab-content">
-                <div class="split-layout-2">
-                    <!-- Left: SAP Config -->
+                
+                <!-- Login Overlay -->
+                <div id="admin-login-overlay" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px;">
+                    <div class="glass-panel" style="width: 350px; padding: 25px;">
+                        <h2 style="color:var(--text-main); font-family:var(--font-mono); font-size:14px; text-align:center; margin-bottom: 20px;">
+                            <i data-lucide="lock"></i> ADMIN AUTHENTICATION
+                        </h2>
+                        <div class="control-group">
+                            <label class="control-label">Username</label>
+                            <input type="text" class="control-input" id="admin-login-user" placeholder="Enter admin username">
+                        </div>
+                        <div class="control-group" style="margin-top:10px;">
+                            <label class="control-label">Password</label>
+                            <input type="password" class="control-input" id="admin-login-pass" placeholder="••••••••••••">
+                        </div>
+                        <button class="btn-primary" id="btn-admin-login" style="width:100%; margin-top:20px;">
+                            Authenticate
+                        </button>
+                        <div id="admin-login-msg" style="color:var(--accent-red); font-size:10px; margin-top:10px; text-align:center; display:none;"></div>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard (Hidden until login) -->
+                <div class="split-layout-2" id="admin-dashboard" style="display: none;">
+                    <!-- Left: Custom API Config -->
                     <div class="glass-panel">
                         <div class="panel-header">
-                            <span class="panel-title"><i data-lucide="server"></i> SAP &amp; Team Connectivity Settings</span>
+                            <span class="panel-title"><i data-lucide="server"></i> APEX Team Sync &amp; Custom API</span>
                         </div>
                         <div class="panel-body">
                             <div class="control-group">
-                                <label class="control-label">SAP Host URL</label>
-                                <input type="text" class="control-input" id="sap-host-input" placeholder="https://api.sap.com/s4hana/...">
+                                <label class="control-label">Target Backend API URL</label>
+                                <input type="text" class="control-input" id="sap-host-input" placeholder="https://api.yourdomain.com/v1">
                             </div>
                             <div class="control-group">
-                                <label class="control-label">SAP Client ID / Project ID</label>
-                                <input type="text" class="control-input" id="sap-client-input" placeholder="e.g., APEX-TEAM-01">
+                                <label class="control-label" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span>Team Project ID</span>
+                                    <button id="btn-generate-project-id" style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:9px;">Generate ID</button>
+                                </label>
+                                <input type="text" class="control-input" id="sap-client-input" placeholder="e.g., PRJ-XYZ-99">
                             </div>
                             <div class="control-group">
-                                <label class="control-label">SAP Username / Access Key</label>
-                                <input type="text" class="control-input" id="sap-user-input" placeholder="Service Account Username">
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label">SAP Password / Secret</label>
+                                <label class="control-label">API Access Key</label>
                                 <input type="password" class="control-input" id="sap-pass-input" placeholder="••••••••••••">
                             </div>
                             
                             <div style="display:flex; justify-content: space-between; align-items:center; margin-top: 15px;">
-                                <label style="font-size: 10px; color: var(--text-secondary);"><input type="checkbox" id="sap-sync-enable" checked> Enable Auto-Sync to Team Project</label>
+                                <label style="font-size: 10px; color: var(--text-secondary);"><input type="checkbox" id="sap-sync-enable" checked> Enable Live Sync</label>
                                 <button class="btn-primary" id="btn-sap-save">
-                                    <i data-lucide="save"></i> Save Credentials &amp; Test Sync
+                                    <i data-lucide="save"></i> Connect &amp; Sync
                                 </button>
                             </div>
                             <div id="sap-admin-msg" style="margin-top:10px; font-size:10px; font-family:var(--font-mono); color:var(--accent-cyan);"></div>

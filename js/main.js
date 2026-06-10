@@ -202,37 +202,72 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => ConsoleLog.ok('IMU bias calibrated. ESC range: 1020–1980μs confirmed.'), 2000);
     });
 
-    // Admin SAP Integration
-    document.getElementById('btn-sap-save')?.addEventListener('click', async () => {
-        const host = document.getElementById('sap-host-input')?.value.trim();
-        const client = document.getElementById('sap-client-input')?.value.trim();
-        const user = document.getElementById('sap-user-input')?.value.trim();
-        const pass = document.getElementById('sap-pass-input')?.value.trim();
-        const msgEl = document.getElementById('sap-admin-msg');
+    // Admin Panel Authentication
+    document.getElementById('btn-admin-login')?.addEventListener('click', async () => {
+        const user = document.getElementById('admin-login-user')?.value.trim();
+        const pass = document.getElementById('admin-login-pass')?.value.trim();
+        const msgEl = document.getElementById('admin-login-msg');
 
-        if (!host || !user) {
-            if (msgEl) { msgEl.style.color = 'var(--accent-amber)'; msgEl.textContent = 'Please provide host URL and Username.'; }
+        if (!user || !pass) {
+            if (msgEl) { msgEl.style.display = 'block'; msgEl.textContent = 'Please enter username and password.'; }
             return;
         }
 
-        if (msgEl) { msgEl.style.color = 'var(--text-main)'; msgEl.textContent = 'Authenticating with SAP backend...'; }
-        
         try {
-            const res = await fetch(`${window.APEX?.apiBase || ''}/api/sap/connect`, {
+            const res = await fetch(`${window.APEX?.apiBase || ''}/api/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ host, client, user, pass })
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.status === 'success') {
+                document.getElementById('admin-login-overlay').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'flex';
+                ConsoleLog.ok('Admin authentication successful. Dashboard unlocked.');
+            } else {
+                throw new Error(data.message || 'Invalid credentials');
+            }
+        } catch(e) {
+            if (msgEl) { msgEl.style.display = 'block'; msgEl.textContent = 'ERROR: ' + e.message; }
+            ConsoleLog.error('Admin authentication failed.');
+        }
+    });
+
+    // Generate Project ID
+    document.getElementById('btn-generate-project-id')?.addEventListener('click', () => {
+        const idInput = document.getElementById('sap-client-input');
+        if (idInput) {
+            const randomHash = Math.random().toString(36).substring(2, 8).toUpperCase();
+            idInput.value = `PRJ-${randomHash}`;
+            ConsoleLog.info(`Generated new Team Project ID: ${idInput.value}`);
+        }
+    });
+
+    // Custom API / Team Integration Connect
+    document.getElementById('btn-sap-save')?.addEventListener('click', async () => {
+        const host = document.getElementById('sap-host-input')?.value.trim() || 'Internal Network';
+        const project = document.getElementById('sap-client-input')?.value.trim() || 'Default-Project';
+        const msgEl = document.getElementById('sap-admin-msg');
+
+        if (msgEl) { msgEl.style.color = 'var(--text-main)'; msgEl.textContent = 'Authenticating with custom API...'; }
+        
+        try {
+            const res = await fetch(`${window.APEX?.apiBase || ''}/api/team/connect`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ host, project })
             });
             const data = await res.json();
             if (res.ok && data.status === 'success') {
-                if (msgEl) { msgEl.style.color = 'var(--accent-green)'; msgEl.textContent = 'SUCCESS: SAP Connection established and verified.'; }
-                ConsoleLog.ok(`SAP connected: ${host}`);
+                if (msgEl) { msgEl.style.color = 'var(--accent-green)'; msgEl.textContent = `SUCCESS: Connected to Project ${project}`; }
+                ConsoleLog.ok(`Team Sync connected: ${host} [${project}]`);
             } else {
                 throw new Error(data.message || 'Connection failed');
             }
         } catch (e) {
             if (msgEl) { msgEl.style.color = 'var(--accent-red)'; msgEl.textContent = 'ERROR: ' + e.message; }
-            ConsoleLog.error(`SAP connection failed: ${e.message}`);
+            ConsoleLog.error(`Custom API connection failed: ${e.message}`);
         }
     });
 
