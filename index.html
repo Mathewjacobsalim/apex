@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="APEX-OS: Universal AI Engineering Operating System for USV, UAV, and autonomous systems startups. Integrates CAD, CFD, FEA, Mission Planning, Manufacturing, Procurement, Digital Twin, and ERP.">
+    <title>APEX-OS // Universal AI Engineering System</title>
+
+    <!-- CSS Style Sheets -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- Main Head Banner -->
+    <header class="app-header">
+        <div class="brand-section">
+            <div class="brand-logo"></div>
+            <div>
+                <h1 class="brand-title">APEX-OS</h1>
+                <div class="brand-subtitle">Universal AI Engineering System</div>
+            </div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="cad-tab">
+                <i data-lucide="box"></i> CAD &amp; FEA
+            </button>
+            <button class="tab-btn" data-tab="ai-tab">
+                <i data-lucide="cpu"></i> AI Co-Engineer
+            </button>
+            <button class="tab-btn" data-tab="mission-tab">
+                <i data-lucide="map-pin"></i> Waypoints &amp; GPS
+            </button>
+            <button class="tab-btn" data-tab="embedded-tab">
+                <i data-lucide="binary"></i> Embedded &amp; PCB
+            </button>
+            <button class="tab-btn" data-tab="fab-tab">
+                <i data-lucide="anvil"></i> Manufacturing
+            </button>
+            <button class="tab-btn" data-tab="procure-tab">
+                <i data-lucide="shopping-cart"></i> BOM &amp; Vendor
+            </button>
+            <button class="tab-btn" data-tab="twin-tab">
+                <i data-lucide="activity"></i> Twin &amp; Telemetry
+            </button>
+            <button class="tab-btn" data-tab="sim-tab">
+                <i data-lucide="waves"></i> Ocean Sim
+            </button>
+            <button class="tab-btn" data-tab="erp-tab">
+                <i data-lucide="bar-chart-2"></i> ERP &amp; Ops
+            </button>
+        </nav>
+
+        <div class="header-status">
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>SYSTEM ONLINE</span>
+            </div>
+            <div class="status-indicator">
+                <span>VEHICLE: <strong id="selected-vehicle-badge" style="color: var(--accent-cyan);">APEX-USV-01</strong></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Workspace Content -->
+    <main class="app-container">
+        <div class="workspace-main">
+
+            <!-- 1. CAD & FEA/CFD Viewport Tab -->
+            <section id="cad-tab" class="tab-content active">
+                <div class="split-layout-cad">
+                    <!-- Left Control Sidebar -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="sliders"></i> Design Parameters</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="control-group">
+                                <label class="control-label">Template Type</label>
+                                <select class="control-select" id="cad-template-select">
+                                    <option value="usv-monohull">USV Monohull Template</option>
+                                    <option value="usv-catamaran">USV Catamaran Template</option>
+                                    <option value="uav-quadcopter">UAV Quadcopter Frame</option>
+                                    <option value="uav-hexacopter">UAV Hexacopter Frame</option>
+                                    <option value="fixed-wing">Fixed-Wing UAV</option>
+                                    <option value="submarine">Submarine / AUV</option>
+                                </select>
+                            </div>
+
+                            <!-- Hull Parameters (Toggleable) -->
+                            <div id="hull-param-group">
+                                <div class="control-group">
+                                    <label class="control-label">Hull Length (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="hull-length" min="1.0" max="6.0" step="0.1" value="3.5">
+                                        <span class="slider-val" id="hull-length-val">3.5m</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Hull Beam (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="hull-beam" min="0.5" max="2.5" step="0.05" value="1.2">
+                                        <span class="slider-val" id="hull-beam-val">1.2m</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Hull Draft (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="hull-draft" min="0.1" max="0.8" step="0.02" value="0.3">
+                                        <span class="slider-val" id="hull-draft-val">0.3m</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Deadrise Angle (deg)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="hull-deadrise" min="5" max="25" step="1" value="15">
+                                        <span class="slider-val" id="hull-deadrise-val">15°</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Drone Parameters (Toggleable) -->
+                            <div id="drone-param-group" style="display: none;">
+                                <div class="control-group">
+                                    <label class="control-label">Arm Length (mm)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="drone-arm" min="150" max="800" step="10" value="380">
+                                        <span class="slider-val" id="drone-arm-val">380mm</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Hub Diameter (mm)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="drone-hub" min="80" max="300" step="5" value="150">
+                                        <span class="slider-val" id="drone-hub-val">150mm</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Rotor Count</label>
+                                    <select class="control-select" id="drone-rotors">
+                                        <option value="4">4 Rotors (Quad)</option>
+                                        <option value="6">6 Rotors (Hexa)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Fixed-Wing Parameters -->
+                            <div id="fixed-wing-param-group" style="display: none;">
+                                <div class="control-group">
+                                    <label class="control-label">Wingspan (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="fw-wingspan" min="0.5" max="5.0" step="0.1" value="2.0">
+                                        <span class="slider-val" id="fw-wingspan-val">2.0m</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Root Chord (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="fw-chord" min="0.1" max="1.0" step="0.05" value="0.3">
+                                        <span class="slider-val" id="fw-chord-val">0.3m</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Sweep Angle (deg)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="fw-sweep" min="0" max="45" step="1" value="15">
+                                        <span class="slider-val" id="fw-sweep-val">15°</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submarine Parameters -->
+                            <div id="sub-param-group" style="display: none;">
+                                <div class="control-group">
+                                    <label class="control-label">Hull Diameter (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="sub-diameter" min="0.1" max="1.0" step="0.05" value="0.3">
+                                        <span class="slider-val" id="sub-diameter-val">0.3m</span>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Tube Length (m)</label>
+                                    <div class="range-slider-container">
+                                        <input type="range" class="control-range" id="sub-length" min="0.5" max="4.0" step="0.1" value="1.5">
+                                        <span class="slider-val" id="sub-length-val">1.5m</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Import Custom 3D CAD</label>
+                                <input type="file" id="cad-upload-input" accept=".stl,.obj,.stp,.step" style="display: none;">
+                                <button class="btn-secondary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="document.getElementById('cad-upload-input').click();">
+                                    <i data-lucide="upload"></i> Upload STL / STEP
+                                </button>
+                                <div id="cad-upload-status" style="font-size: 9px; color: var(--text-muted); margin-top: 4px; text-align: center;"></div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Primary Material</label>
+                                <select class="control-select" id="cad-material-select">
+                                    <option value="cf">Carbon Fiber Prepreg</option>
+                                    <option value="al">Marine Grade Aluminum (5083)</option>
+                                    <option value="hdpe">High-Density Polyethylene</option>
+                                    <option value="frp">Fiber Reinforced Polymer</option>
+                                    <option value="ss">Stainless Steel 316</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-primary" style="width: 100%; margin-top: 10px;" id="cad-export-btn">
+                                <i data-lucide="download"></i> Export STEP / DXF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Center 3D CAD Canvas Viewport -->
+                    <div class="glass-panel" style="padding:0;">
+                        <div class="viewport-overlay-toolbar">
+                            <button class="viewport-btn active" id="view-cad-btn" title="Solid Shading Mode"><i data-lucide="box"></i></button>
+                            <button class="viewport-btn" id="view-fea-btn" title="FEA Load Stress Analysis"><i data-lucide="flame"></i></button>
+                            <button class="viewport-btn" id="view-cfd-btn" title="CFD Fluid Streamlines"><i data-lucide="wind"></i></button>
+                            <button class="viewport-btn" id="view-wire-btn" title="Wireframe Mode"><i data-lucide="grid"></i></button>
+                        </div>
+                        <div class="mode-badge-overlay" id="cad-mode-badge">Model Mode: Solid</div>
+                        <div class="viewport-stats-overlay" id="cad-stats-overlay">
+                            MASS: <span id="stat-mass">24.5 kg</span><br>
+                            VOLUME: <span id="stat-volume">0.012 m³</span><br>
+                            DISPLACEMENT: <span id="stat-displacement">350 L</span><br>
+                            MAX STRESS (FEA): <span id="stat-stress">145 MPa</span><br>
+                            DRAG FORCE (CFD): <span id="stat-drag">12.4 N</span>
+                        </div>
+                        <div class="cad-viewport-container" id="cad-viewport-container">
+                            <!-- Three.js Canvas will be appended here -->
+                        </div>
+                    </div>
+
+                    <!-- Right Analysis Results Panel -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="trending-up"></i> FEA &amp; CFD Analysis</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="instrument-panel" style="margin-top: 0;">
+                                <div class="instrument-card">
+                                    <div class="instrument-label">FOS (Safety Factor)</div>
+                                    <div class="instrument-value" id="stat-fos" style="color: var(--accent-green);">2.8</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Max Deflection</div>
+                                    <div class="instrument-value" id="stat-deflection">1.45 mm</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="control-label">CFD Speed Vector (knots)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="cfd-speed" min="0" max="30" step="1" value="10">
+                                    <span class="slider-val" id="cfd-speed-val">10 kts</span>
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                                <span class="control-label">Hydrodynamic drag curve</span>
+                                <div style="height: 120px; position: relative;">
+                                    <canvas id="dragCurveChart" style="width:100%; height:100%;"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- FEA Color Legend -->
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+                                <span class="control-label">FEA Stress Legend (MPa)</span>
+                                <div style="display:flex; align-items:center; gap:6px; margin-top:6px;">
+                                    <div style="flex:1; height:8px; background: linear-gradient(90deg, #39ff14, #ffb700, #ff0055); border-radius:4px;"></div>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:9px; color:var(--text-muted); margin-top:3px;">
+                                    <span>0</span><span>75</span><span>150</span><span>225</span><span>300</span>
+                                </div>
+                            </div>
+
+                            <!-- Raw Solver Output Column -->
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; flex: 1; display: flex; flex-direction: column; min-height: 150px;">
+                                <span class="control-label">Raw FEA & CFD Solver Output</span>
+                                <textarea id="solver-output-console" readonly style="width: 100%; flex: 1; margin-top: 6px; background: var(--panel-bg); border: 1px solid var(--border-color); color: #00f0ff; font-family: var(--font-mono); font-size: 10px; padding: 8px; resize: none; border-radius: 4px; overflow-y: auto;" placeholder="Solver initializing..."></textarea>
+                            </div>
+
+                            <button class="btn-secondary" style="width:100%; margin-top: auto;" id="run-simulation-btn">
+                                <i data-lucide="play"></i> Run ANSYS/OpenFOAM Solver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. AI CO-ENGINEER TAB -->
+            <section id="ai-tab" class="tab-content">
+                <div class="split-layout-2">
+                    <!-- Left Workspace Viewport (AI Draft Vision Preview & CAD reference) -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="eye"></i> AI Draft Vision &amp; Sketch Vectorizer</span>
+                            <div class="panel-actions">
+                                <button class="btn-secondary" style="font-size:10px; padding:4px 10px;" onclick="document.getElementById('draft-vector-svg').style.display='none'; document.getElementById('drag-drop-zone').style.display='flex'; document.getElementById('draft-placeholder').style.display='flex';">
+                                    <i data-lucide="refresh-cw"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-body draft-vision-container">
+                            <div class="upload-zone" id="drag-drop-zone">
+                                <i data-lucide="upload-cloud" class="upload-icon"></i>
+                                <h3>Upload Image, Photo or Hand-Drawn Sketch</h3>
+                                <p style="color: var(--text-secondary); font-size: 11px; margin-top: 5px;">Drag &amp; Drop or Click to browse. Supports PNG, JPG, CAD sketches</p>
+                                <p style="color: var(--accent-cyan); font-size: 10px; margin-top: 8px; font-family: var(--font-mono);">→ Converts to engineering blueprint / DXF</p>
+                            </div>
+
+                            <div class="draft-preview-panel">
+                                <div id="draft-spinner" style="display: none; position: absolute; flex-direction: column; align-items: center; gap: 10px; color: var(--accent-cyan);">
+                                    <i data-lucide="loader" class="animate-spin"></i>
+                                    <span style="font-family: var(--font-mono); font-size: 10px;">VECTORIZING GEOMETRY...</span>
+                                </div>
+                                <div id="draft-placeholder" style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">
+                                    VECTORIZED PREVIEW WINDOW (DXF/SVG)
+                                </div>
+                                <svg id="draft-vector-svg" viewBox="0 0 400 300" style="display: none; width: 100%; height: 100%; padding: 20px;">
+                                    <!-- Dynamic elements will be inserted by JS -->
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Assistant Conversation panel -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="bot"></i> AI CAD Co-Engineer</span>
+                            <div class="status-indicator" style="font-size:9px; font-family:var(--font-mono);">
+                                <span class="status-dot"></span>
+                                <span>APEX-AI ONLINE</span>
+                            </div>
+                        </div>
+                        <div class="panel-body ai-sidebar">
+                            <div class="ai-message-list" id="ai-messages">
+                                <div class="ai-message assistant">
+                                    <strong>APEX-AI:</strong> System initialized. I'm your AI CAD Co-Engineer powered by the APEX-engineer-7B model. I can generate geometry, run topology optimization, suggest materials, and detect manufacturability issues. What should we design or optimize?
+                                </div>
+                            </div>
+                            <div class="ai-suggested-prompts">
+                                <span class="control-label">Tactical Commands</span>
+                                <button class="ai-prompt-chip" data-cmd="optimize-hull">"Optimize hull parameters for minimum hydrodynamic drag"</button>
+                                <button class="ai-prompt-chip" data-cmd="bracket-gen">"Generate mounting bracket for navigation radar sensor"</button>
+                                <button class="ai-prompt-chip" data-cmd="weight-saving">"Lighter structure recommendation for quadcopter frame arms"</button>
+                            </div>
+                            <div class="ai-input-area">
+                                <input type="text" class="control-input" id="ai-chat-input" placeholder="Ask AI Co-Engineer...">
+                                <button class="btn-primary" id="ai-send-btn"><i data-lucide="send"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. WAYPOINTS & MISSION TAB -->
+            <section id="mission-tab" class="tab-content">
+                <div class="split-layout">
+                    <!-- Waypoints controls -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="navigation"></i> Navigation &amp; Route Planner</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="control-group">
+                                <label class="control-label">Waypoint Mode</label>
+                                <select class="control-select" id="mission-type-select">
+                                    <option value="usv-patrol">USV Autonomous Patrol</option>
+                                    <option value="usv-rescue">USV Search &amp; Rescue Grid</option>
+                                    <option value="uav-survey">UAV Aerial Survey Mapping</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-primary" id="clear-waypoints-btn" style="width: 100%;">
+                                <i data-lucide="trash-2"></i> Clear Waypoints
+                            </button>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 10px;">
+                                <label class="control-label">Waypoints List</label>
+                                <div id="waypoints-list-container" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 10px;">Click map to add waypoints</div>
+                                </div>
+                            </div>
+
+                            <button class="btn-primary" id="optimize-route-btn" style="width: 100%; margin-top: auto;">
+                                <i data-lucide="zap"></i> Optimize Route (A* / ROS2)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Map pane -->
+                    <div class="glass-panel" style="padding: 0; position: relative;">
+                        <div class="mode-badge-overlay" style="border-left-color: var(--accent-green); z-index: 1000;">GPS Map View — Click to Add Waypoints</div>
+                        <button class="btn-primary" id="btn-gps-locate" style="position: absolute; bottom: 20px; left: 20px; z-index: 1000; background: rgba(11, 17, 25, 0.9); box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
+                            <i data-lucide="crosshair"></i> Find Current Location
+                        </button>
+                        <div class="map-viewport" id="mission-map" style="flex: 1; min-height: 0; width: 100%;"></div>
+                    </div>
+
+                    <!-- Mission Obstacles / Parameters -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="wind"></i> Environmental Conditions</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="control-group">
+                                <label class="control-label">Sea State (Beaufort Scale)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="env-sea-state" min="0" max="6" step="1" value="2">
+                                    <span class="slider-val" id="env-sea-state-val">SS 2</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Wind Velocity (knots)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="env-wind" min="0" max="45" step="1" value="12">
+                                    <span class="slider-val" id="env-wind-val">12 kts</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Current Direction (deg)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="env-current-dir" min="0" max="359" step="5" value="240">
+                                    <span class="slider-val" id="env-current-dir-val">240°</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Avoidance Safeguard</label>
+                                <select class="control-select">
+                                    <option>LiDAR/Radar Avoidance Level 3 (High)</option>
+                                    <option>Vision-Based Obstacle Bypassing</option>
+                                    <option>Restricted Exclusion Zones Only</option>
+                                </select>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px;">
+                                <div class="status-indicator" style="justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
+                                    <span>ROUTE FEASIBILITY:</span>
+                                    <span class="badge badge-green" id="route-feasibility-badge">SECURE</span>
+                                </div>
+                                <div class="status-indicator" style="justify-content: space-between; font-family: var(--font-mono); font-size: 11px; margin-top: 8px;">
+                                    <span>EST. MISSION TIME:</span>
+                                    <span id="route-duration" style="color: var(--accent-cyan);">—</span>
+                                </div>
+                                <div class="status-indicator" style="justify-content: space-between; font-family: var(--font-mono); font-size: 11px; margin-top: 8px;">
+                                    <span>OBSTACLE DETECTED:</span>
+                                    <span class="badge badge-amber">MONITOR</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. EMBEDDED & PCB TAB -->
+            <section id="embedded-tab" class="tab-content">
+                <div class="split-layout-2">
+                    <!-- Central PCB schematic visualizer -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="cpu"></i> Embedded System Architecture &amp; Wiring Diagram</span>
+                            <div class="panel-actions">
+                                <span class="badge badge-green">CAN LIVE</span>
+                                <span class="badge badge-cyan" style="margin-left:6px;">MAVLink v2</span>
+                            </div>
+                        </div>
+                        <div class="panel-body" style="padding:0; position: relative;">
+                            <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+                                <input type="file" id="pcb-upload-input" accept="image/*,.gbr" style="display: none;">
+                                <button class="btn-secondary" style="font-size: 10px; padding: 4px 8px; background: rgba(0,0,0,0.6);" onclick="document.getElementById('pcb-upload-input').click();">
+                                    <i data-lucide="upload"></i> Load Schematic
+                                </button>
+                            </div>
+                            <div class="pcb-container" id="pcb-container">
+                                <!-- Interactive canvas showing wiring connections -->
+                                <canvas id="pcb-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ArduPilot FC Integration Panel -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="cpu"></i> Flight Controller Link</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
+                            
+                            <!-- FC Connection -->
+                            <div class="control-group">
+                                <label class="control-label">MAVLink Connection</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <select class="control-select" id="fc-port-select" style="flex: 1;">
+                                        <option value="udp:127.0.0.1:14550">UDP (SITL/Network)</option>
+                                        <option value="COM3">COM3 (USB Serial)</option>
+                                        <option value="/dev/ttyACM0">/dev/ttyACM0 (Linux USB)</option>
+                                    </select>
+                                    <button class="btn-primary" id="btn-fc-connect" style="width: auto;">Connect</button>
+                                </div>
+                                <div class="status-indicator" style="justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
+                                    <span>STATUS:</span>
+                                    <span class="badge badge-amber" id="fc-status-badge">DISCONNECTED</span>
+                                </div>
+                            </div>
+
+                            <hr style="border: 0; border-top: 1px solid rgba(0, 240, 255, 0.1); margin: 5px 0;">
+
+                            <!-- Calibrations -->
+                            <div class="panel-title" style="margin-bottom: -5px; color: var(--text-primary);"><i data-lucide="compass"></i> Pre-Flight Calibration</div>
+                            
+                            <!-- Accelerometer -->
+                            <div class="control-group" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label class="control-label" style="margin: 0;">Accelerometer (IMU)</label>
+                                    <button class="btn-secondary" id="btn-cal-accel" style="padding: 4px 8px; font-size: 9px;" disabled>START</button>
+                                </div>
+                                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                                    <div id="prog-cal-accel" style="width: 0%; height: 100%; background: var(--accent-cyan); transition: width 0.3s;"></div>
+                                </div>
+                                <div id="status-cal-accel" style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); margin-top: 4px; text-align: right;">Pending Connection...</div>
+                            </div>
+
+                            <!-- Compass -->
+                            <div class="control-group" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label class="control-label" style="margin: 0;">Compass / Mag</label>
+                                    <button class="btn-secondary" id="btn-cal-compass" style="padding: 4px 8px; font-size: 9px;" disabled>START</button>
+                                </div>
+                                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                                    <div id="prog-cal-compass" style="width: 0%; height: 100%; background: var(--accent-cyan); transition: width 0.3s;"></div>
+                                </div>
+                                <div id="status-cal-compass" style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); margin-top: 4px; text-align: right;">Pending Connection...</div>
+                            </div>
+
+                            <!-- Radio -->
+                            <div class="control-group" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label class="control-label" style="margin: 0;">Radio Control (RC)</label>
+                                    <button class="btn-secondary" id="btn-cal-radio" style="padding: 4px 8px; font-size: 9px;" disabled>START</button>
+                                </div>
+                                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                                    <div id="prog-cal-radio" style="width: 0%; height: 100%; background: var(--accent-cyan); transition: width 0.3s;"></div>
+                                </div>
+                                <div id="status-cal-radio" style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); margin-top: 4px; text-align: right;">Pending Connection...</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. MANUFACTURING & NESTING TAB -->
+            <section id="fab-tab" class="tab-content">
+                <div class="split-layout-2">
+                    <!-- Left: Nesting layout and code visualizer -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="layout"></i> CNC Nesting Optimizer &amp; Laser Toolpaths</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <span class="control-label">Sheet Nesting Visualizer</span>
+                                <canvas class="nesting-canvas" id="nesting-canvas"></canvas>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px; flex: 1; display: flex; flex-direction: column;">
+                                <span class="control-label">Auto-Generated G-Code Console</span>
+                                <textarea id="gcode-console" readonly style="flex: 1; background: #040609; border: 1px solid var(--border-color); color: var(--accent-cyan); font-family: 'Consolas', monospace; font-size: 11px; padding: 10px; resize: none; outline: none; border-radius: 4px; min-height: 120px;">
+G21 ; Set units to mm
+G90 ; Absolute positioning
+G28 ; Home all axes
+M3 S24000 ; Laser ON (Fiber 6kW)
+; === PART: HULL-SIDE-L ===
+G0 X10.5 Y12.2 F8000
+G1 X120.4 Y12.2 F2500
+G1 X120.4 Y62.2
+G1 X10.5  Y62.2
+G1 X10.5  Y12.2
+G0 X150.0 Y12.2
+; === PART: HULL-SIDE-R ===
+G1 X270.0 Y12.2 F2500
+G1 X270.0 Y62.2
+G1 X150.0 Y62.2
+G1 X150.0 Y12.2
+M5 ; Laser OFF
+G0 X0 Y0 ; Return home
+M30 ; Program end
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Manufacturing dashboard parameters -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="anvil"></i> Shop Floor &amp; Fabrication Details</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="control-group">
+                                <label class="control-label">Laser/CNC Machine Profile</label>
+                                <select class="control-select">
+                                    <option>Bystronic ByStar Fiber 6kW</option>
+                                    <option>OMAX Waterjet Cutter</option>
+                                    <option>Markforged X7 Carbon Fiber 3DP</option>
+                                    <option>Haas VF-2 CNC Mill</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Material Sheet Dimensions (mm)</label>
+                                <select class="control-select">
+                                    <option>2440 × 1220 mm (Standard 8×4)</option>
+                                    <option>3000 × 1500 mm</option>
+                                    <option>Custom Sheet Config</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Kerf Diameter / Blade Gap</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" min="0.1" max="1.5" step="0.05" value="0.2">
+                                    <span class="slider-val">0.2 mm</span>
+                                </div>
+                            </div>
+                            <div class="instrument-panel" style="margin-top: 0;">
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Yield Efficiency</div>
+                                    <div class="instrument-value" style="color: var(--accent-green);">89.2%</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Weld Line Count</div>
+                                    <div class="instrument-value">12 joints</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Est. Cut Time</div>
+                                    <div class="instrument-value" style="color:var(--accent-amber);">4h 22m</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Parts Count</div>
+                                    <div class="instrument-value">9</div>
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top:12px;">
+                                <span class="control-label">Manufacturing Reliability &amp; QA Checks</span>
+                                <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px; font-size:11px;">
+                                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Material Yield Stress Limit OK</span>
+                                        <input type="checkbox" id="chk-mfg-yield" checked style="accent-color: var(--accent-green);">
+                                    </label>
+                                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Tolerance within ±0.05mm</span>
+                                        <input type="checkbox" id="chk-mfg-tol" checked style="accent-color: var(--accent-green);">
+                                    </label>
+                                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Tool Wear Constraints Valid</span>
+                                        <input type="checkbox" id="chk-mfg-wear" checked style="accent-color: var(--accent-green);">
+                                    </label>
+                                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Structural Safety Factor > 1.5</span>
+                                        <input type="checkbox" id="chk-mfg-sf" checked style="accent-color: var(--accent-green);">
+                                    </label>
+                                </div>
+                                <div id="mfg-validation-msg" style="color: var(--accent-red); font-size: 10px; margin-top: 8px; font-family: var(--font-mono); display: none;">
+                                    ERROR: All reliability checks must pass before exporting.
+                                </div>
+                            </div>
+
+                            <button class="btn-primary" style="width: 100%; margin-top: auto;" id="btn-export-dxf">
+                                <i data-lucide="shield-check"></i> Validate &amp; Export G-Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. BOM & PROCUREMENT TAB -->
+            <section id="procure-tab" class="tab-content">
+                <div class="split-layout-2">
+                    <!-- Left: BOM list and part entries -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="layers"></i> Engineering Bill of Materials (BOM)</span>
+                            <div class="panel-actions">
+                                <button class="btn-secondary" id="export-bom-csv"><i data-lucide="file-text"></i> Export CSV</button>
+                            </div>
+                        </div>
+                        <div class="panel-body data-table-container">
+                            <table class="data-table" id="bom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Part Name</th>
+                                        <th>Material/Spec</th>
+                                        <th>Vendor</th>
+                                        <th>Qty</th>
+                                        <th>Unit Cost</th>
+                                        <th>Total Cost</th>
+                                        <th>Weight (ea)</th>
+                                        <th>Lead Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bom-table-body">
+                                    <!-- Rendered dynamically by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Smart URL scanner and components checker -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="search"></i> AI Smart Procurement Scan</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="control-group">
+                                <label class="control-label">Paste Vendor Product URL</label>
+                                <input type="text" class="control-input" id="vendor-url-input" placeholder="e.g., https://www.mcmaster.com/12345/">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-primary" id="btn-scan-product" style="flex:1;">
+                                    <i data-lucide="scan"></i> Scan Product Page
+                                </button>
+                                <div style="display: flex; flex-direction: column; justify-content: center; font-size: 10px; color: var(--text-secondary);">
+                                    <label><input type="checkbox" id="sync-prices-check" checked> Auto Sync Price</label>
+                                    <label><input type="checkbox" id="track-changes-check" checked> Track Changes</label>
+                                </div>
+                            </div>
+
+                            <!-- Supported vendors -->
+                            <div style="border-top: 1px solid var(--border-color); padding-top:10px;">
+                                <span class="control-label">Supported Vendors</span>
+                                <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:6px;">
+                                    <span class="badge badge-cyan">DigiKey</span>
+                                    <span class="badge badge-cyan">Mouser</span>
+                                    <span class="badge badge-cyan">McMaster-Carr</span>
+                                    <span class="badge badge-cyan">RS Components</span>
+                                    <span class="badge badge-cyan">Robu.in</span>
+                                    <span class="badge badge-cyan">Amazon Business</span>
+                                    <span class="badge badge-cyan">IndiaMART</span>
+                                    <span class="badge badge-cyan">BlueRobotics</span>
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                                <span class="control-label">Component Visual Recognition AI</span>
+                                <div class="upload-zone" id="img-component-drag" style="padding: 15px 10px; border-width: 1px;">
+                                    <i data-lucide="eye" style="font-size: 20px; color: var(--accent-cyan);"></i>
+                                    <span style="display:block; font-size: 10px; margin-top: 5px;">Click to Identify Component — Detects counterfeit risk &amp; specs</span>
+                                </div>
+                                <div id="scan-result-card" style="display:none; background: rgba(0,240,255,0.02); border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; margin-top: 10px;">
+                                    <div style="display:flex; justify-content:space-between; font-size: 11px; margin-bottom: 5px;">
+                                        <strong id="scan-result-name" style="color:var(--accent-cyan);">-</strong>
+                                        <span class="badge badge-green" id="scan-result-confidence">98% Match</span>
+                                    </div>
+                                    <p id="scan-result-details" style="font-size: 10px; color: var(--text-secondary); line-height: 1.4;">-</p>
+                                </div>
+                            </div>
+
+                            <!-- SAP ERP Integration -->
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                                <span class="control-label" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span><i data-lucide="server" style="width: 12px; height: 12px; display: inline-block;"></i> SAP S/4HANA ERP Synchronization</span>
+                                    <span class="badge badge-amber" id="sap-status-badge">DISCONNECTED</span>
+                                </span>
+                                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                    <button class="btn-secondary" id="btn-sap-connect" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                                        <i data-lucide="link"></i> Connect to SAP Gateway
+                                    </button>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn-secondary" id="btn-sap-sync-bom" style="flex: 1; font-size: 10px;" disabled>Sync BOM</button>
+                                        <button class="btn-secondary" id="btn-sap-create-pr" style="flex: 1; font-size: 10px;" disabled>Create PR</button>
+                                    </div>
+                                    <div id="sap-log-console" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 9px; color: var(--accent-cyan); min-height: 40px; max-height: 60px; overflow-y: auto;">
+                                        Waiting for connection...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: auto;">
+                                <div class="instrument-panel" style="margin-top:0;">
+                                    <div class="instrument-card">
+                                        <div class="instrument-label">Total BOM Cost</div>
+                                        <div class="instrument-value" id="bom-total-cost" style="color: var(--accent-cyan);">₹0</div>
+                                    </div>
+                                    <div class="instrument-card">
+                                        <div class="instrument-label">Total Mass</div>
+                                        <div class="instrument-value" id="bom-total-weight">0.0 kg</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. DIGITAL TWIN & TELEMETRY -->
+            <section id="twin-tab" class="tab-content">
+                <div class="split-layout-cad">
+                    <!-- Left: Startup ERP details -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="trending-up"></i> Startup ERP Controls</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="instrument-panel" style="margin-top:0;">
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Monthly Burn Rate</div>
+                                    <div class="instrument-value" style="color: var(--accent-red); font-size: 14px;">$12.5k</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Runway Duration</div>
+                                    <div class="instrument-value" style="color: var(--accent-green); font-size: 14px;">18.4 Months</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="control-label">Inventory Warehouse Tracking</span>
+                                <div id="twin-inventory-list" style="display:flex; flex-direction:column; gap:6px; margin-top:5px; font-family:var(--font-mono); font-size:10px;">
+                                    <div style="display:flex; justify-content:space-between; padding:6px; background:rgba(255,255,255,0.02); border-radius:3px;">
+                                        <span>T200 Thrusters</span>
+                                        <span class="badge badge-green">8 IN STOCK</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:6px; background:rgba(255,255,255,0.02); border-radius:3px;">
+                                        <span>Carbon Sheets 4mm</span>
+                                        <span class="badge badge-amber">2 SHEETS LEFT</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:6px; background:rgba(255,255,255,0.02); border-radius:3px;">
+                                        <span>Pixhawk 6X Autopilot</span>
+                                        <span class="badge badge-red">0 OUT OF STOCK</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 10px;">
+                                <label class="control-label">Active Team Workflows</label>
+                                <div id="twin-workflows-list" style="font-size:10px; color:var(--text-secondary); line-height:1.5;">
+                                    - Design review APEX-Hull-v3.2: <strong style="color:var(--accent-cyan);">Pending Chief approval</strong><br>
+                                    - BOM rev check v3.2: <strong style="color:var(--accent-green);">Completed</strong><br>
+                                    - CNC nesting run #4: <strong style="color:var(--accent-amber);">In progress</strong><br>
+                                    - Vendor PO #1042 (Thrusters): <strong style="color:var(--accent-green);">Shipped</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Digital Twin Telemetry Feeds -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="radio"></i> Real-time Telemetry Dashboard</span>
+                            <div class="status-indicator">
+                                <span class="status-dot"></span>
+                                <span>VEHICLE TELEMETRY CONNECTED</span>
+                            </div>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
+                            <!-- Live charts layout grid -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 180px;">
+                                <div style="border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; background: rgba(7, 10, 14, 0.4); position: relative;">
+                                    <span class="control-label">Pitch / Roll Gyro</span>
+                                    <canvas id="gyroChart" style="width:100%; height:100%;"></canvas>
+                                </div>
+                                <div style="border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; background: rgba(7, 10, 14, 0.4); position: relative;">
+                                    <span class="control-label">Power consumption &amp; Batt Temp</span>
+                                    <canvas id="powerChart" style="width:100%; height:100%;"></canvas>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 180px;">
+                                <div style="border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; background: rgba(7, 10, 14, 0.4); position: relative;">
+                                    <span class="control-label">USV Speed (kts) / Thruster RPM</span>
+                                    <canvas id="speedRPMChart" style="width:100%; height:100%;"></canvas>
+                                </div>
+                                <div style="border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; background: rgba(7, 10, 14, 0.4); position: relative;">
+                                    <span class="control-label">Structural strain gauge telemetry</span>
+                                    <canvas id="strainChart" style="width:100%; height:100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Digital Twin HUD -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="compass"></i> Mission HUD Controls</span>
+                        </div>
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                            <!-- Artificial Horizon Heading indicator inside canvas -->
+                            <canvas id="hud-canvas" width="200" height="200" style="background:#05070a; border: 1px solid var(--border-color); border-radius:50%; box-shadow: var(--glow-cyan);"></canvas>
+
+                            <div class="instrument-panel" style="width:100%; margin-top: 10px;">
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Battery Level</div>
+                                    <div class="instrument-value" id="twin-batt" style="color: var(--accent-green);">98.4%</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">GPS Link</div>
+                                    <div class="instrument-value">14 Sats</div>
+                                </div>
+                            </div>
+
+                            <div style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                                <span class="control-label">Twin Diagnostics</span>
+                                <p style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-green); margin-top: 5px; line-height: 1.8;" id="twin-diagnostics-msg">
+                                    ✓ ALL THRUSTERS NOMINAL<br>
+                                    ✓ BATTERY TEMP: 28.5°C<br>
+                                    ✓ VIBRATION LEVEL: SAFE<br>
+                                    ✓ GPS LOCK: 14 SATS<br>
+                                    ✓ ROS2 HEARTBEAT: OK
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. OCEAN SIMULATION TAB -->
+            <section id="sim-tab" class="tab-content">
+                <div class="split-layout-2">
+                    <div class="glass-panel" style="padding:0; position:relative;">
+                        <div class="mode-badge-overlay" style="border-left-color: var(--accent-green);">Ocean Simulation — Dynamic Sea State</div>
+                        <canvas id="ocean-canvas" style="width:100%; height:100%; display:block; background: linear-gradient(180deg, #02060e 0%, #040d1a 40%, #061428 100%);"></canvas>
+                        <!-- HUD Overlay -->
+                        <div style="position:absolute; bottom:20px; left:20px; font-family:var(--font-mono); font-size:10px; background:rgba(7,10,14,0.85); border:1px solid var(--border-color); padding:10px 14px; border-radius:4px; pointer-events:none;">
+                            <div style="color:var(--accent-cyan);">OCEAN SIM v2.0 // OPENFOAM RENDER</div>
+                            <div style="color:var(--text-secondary); margin-top:4px;">Wave Height: <span style="color:#00f0ff;" id="sim-wave-h">0.8 m</span></div>
+                            <div style="color:var(--text-secondary);">Period: <span style="color:#00f0ff;" id="sim-wave-t">4.2 s</span></div>
+                            <div style="color:var(--text-secondary);">Wind: <span style="color:#39ff14;" id="sim-wind">12 kts NE</span></div>
+                            <div style="color:var(--text-secondary);">Sea State: <span style="color:#ffb700;" id="sim-ss">Beaufort 3</span></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="waves"></i> Simulation Environment Controls</span>
+                        </div>
+                        <div class="panel-body" style="display:flex; flex-direction:column; gap:15px;">
+                            <div class="control-group">
+                                <label class="control-label">Sea State (Beaufort)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="sim-sea" min="0" max="7" step="1" value="3">
+                                    <span class="slider-val" id="sim-sea-val">3</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Wave Height (m)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="sim-wave" min="0.1" max="4.0" step="0.1" value="0.8">
+                                    <span class="slider-val" id="sim-wave-val">0.8 m</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Wind Speed (knots)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" class="control-range" id="sim-wind-spd" min="0" max="40" step="1" value="12">
+                                    <span class="slider-val" id="sim-wind-val">12 kts</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Environment</label>
+                                <select class="control-select" id="sim-env-select">
+                                    <option>Open Ocean — Day</option>
+                                    <option>Coastal Harbor — Dawn</option>
+                                    <option>Offshore — Night Operations</option>
+                                    <option>Storm Scenario</option>
+                                    <option>Port Navigation</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Mission Scenario</label>
+                                <select class="control-select">
+                                    <option>Autonomous Patrol — Grid Coverage</option>
+                                    <option>Search &amp; Rescue — Person-In-Water</option>
+                                    <option>Port Security — Perimeter</option>
+                                    <option>Hydrographic Survey</option>
+                                </select>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top:12px;">
+                                <span class="control-label">Simulation Metrics</span>
+                                <div class="instrument-panel" style="margin-top:8px;">
+                                    <div class="instrument-card">
+                                        <div class="instrument-label">Pitch RMS</div>
+                                        <div class="instrument-value" id="sim-pitch">3.2°</div>
+                                    </div>
+                                    <div class="instrument-card">
+                                        <div class="instrument-label">Roll RMS</div>
+                                        <div class="instrument-value" id="sim-roll">5.1°</div>
+                                    </div>
+                                    <div class="instrument-card">
+                                        <div class="instrument-label">Added Resistance</div>
+                                        <div class="instrument-value" style="font-size:12px;" id="sim-resist">18.4 N</div>
+                                    </div>
+                                    <div class="instrument-card">
+                                        <div class="instrument-label">Speed Loss</div>
+                                        <div class="instrument-value" style="color:var(--accent-amber);" id="sim-speed-loss">1.8 kts</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn-primary" style="width:100%; margin-top:auto;" id="sim-run-btn">
+                                <i data-lucide="play"></i> Run Full Ocean Simulation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. ERP & OPS TAB -->
+            <section id="erp-tab" class="tab-content">
+                <div class="split-layout-cad">
+                    <!-- Project Overview -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="briefcase"></i> Project &amp; Team Management</span>
+                        </div>
+                        <div class="panel-body" style="display:flex; flex-direction:column; gap:15px;">
+                            <div class="instrument-panel" style="margin-top:0;">
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Total Investment</div>
+                                    <div class="instrument-value" style="color:var(--accent-cyan); font-size:14px;">₹48.2L</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Spent to Date</div>
+                                    <div class="instrument-value" style="color:var(--accent-red); font-size:14px;">₹18.6L</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Remaining Budget</div>
+                                    <div class="instrument-value" style="color:var(--accent-green); font-size:14px;">₹29.6L</div>
+                                </div>
+                                <div class="instrument-card">
+                                    <div class="instrument-label">Team Size</div>
+                                    <div class="instrument-value">7 Engineers</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="control-label">Engineering Team</span>
+                                <div style="display:flex; flex-direction:column; gap:5px; margin-top:6px; font-family:var(--font-mono); font-size:10px;">
+                                    <div style="display:flex; justify-content:space-between; padding:5px 8px; background:rgba(0,240,255,0.02); border:1px solid rgba(0,240,255,0.08); border-radius:3px;">
+                                        <span>Arjun S. — Lead Mechanical Engineer</span><span class="badge badge-green">ACTIVE</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:5px 8px; background:rgba(0,240,255,0.02); border:1px solid rgba(0,240,255,0.08); border-radius:3px;">
+                                        <span>Divya R. — Naval Architect</span><span class="badge badge-green">ACTIVE</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:5px 8px; background:rgba(0,240,255,0.02); border:1px solid rgba(0,240,255,0.08); border-radius:3px;">
+                                        <span>Vikram P. — Embedded Systems Lead</span><span class="badge badge-green">ACTIVE</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:5px 8px; background:rgba(0,240,255,0.02); border:1px solid rgba(0,240,255,0.08); border-radius:3px;">
+                                        <span>Priya M. — AI/ROS2 Engineer</span><span class="badge badge-amber">IN REVIEW</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; padding:5px 8px; background:rgba(0,240,255,0.02); border:1px solid rgba(0,240,255,0.08); border-radius:3px;">
+                                        <span>Rahul K. — Manufacturing Engineer</span><span class="badge badge-green">ACTIVE</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="border-top:1px solid var(--border-color); padding-top:12px;">
+                                <span class="control-label">Approvals &amp; Compliance Workflows</span>
+                                <div id="workflows-live-list" style="display:flex; flex-direction:column; gap:5px; margin-top:6px; font-family:var(--font-mono); font-size:10px;">
+                                    <div style="display:flex; justify-content:space-between;"><span>APEX-USV-01 Hull Drawing Rev3.2</span><span class="badge badge-amber">PENDING</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>Propulsion System BOM v4.0</span><span class="badge badge-green">APPROVED</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>IRS Small Vessel Class Cert.</span><span class="badge badge-cyan">SUBMITTED</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>Autonomous Navigation Permit</span><span class="badge badge-red">REQUIRED</span></div>
+                                </div>
+                                <div style="display:flex; gap:5px; margin-top:10px;">
+                                    <input type="text" id="wf-new-title" class="control-input" placeholder="New Workflow..." style="flex:1;">
+                                    <select id="wf-new-status" class="control-select" style="width:100px;">
+                                        <option value="Pending">Pending</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                    <button class="btn-secondary" id="btn-add-workflow"><i data-lucide="plus"></i> Add</button>
+                                </div>
+                            </div>
+
+                            <div style="border-top:1px solid var(--border-color); padding-top:12px;">
+                                <span class="control-label">Central Inventory Management</span>
+                                <div id="inventory-live-list" style="display:flex; flex-direction:column; gap:5px; margin-top:6px; font-family:var(--font-mono); font-size:10px;">
+                                    <!-- Dynamic Inventory -->
+                                </div>
+                                <div style="display:flex; gap:5px; margin-top:10px;">
+                                    <input type="text" id="inv-new-name" class="control-input" placeholder="New Part..." style="flex:1;">
+                                    <select id="inv-new-status" class="control-select" style="width:110px;">
+                                        <option value="IN STOCK">IN STOCK</option>
+                                        <option value="LOW STOCK">LOW STOCK</option>
+                                        <option value="OUT OF STOCK">OUT OF STOCK</option>
+                                        <option value="ON ORDER">ON ORDER</option>
+                                    </select>
+                                    <button class="btn-secondary" id="btn-add-inventory"><i data-lucide="plus"></i> Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Burn Rate & Financial Chart -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="bar-chart-2"></i> Financial Dashboard — Burn Rate &amp; Revenue</span>
+                        </div>
+                        <div class="panel-body" style="display:flex; flex-direction:column; gap:15px;">
+                            <div style="height: 220px; position:relative;">
+                                <canvas id="burnRateChart" style="width:100%; height:100%;"></canvas>
+                            </div>
+
+                            <div style="border-top:1px solid var(--border-color); padding-top:12px;">
+                                <span class="control-label">Milestones</span>
+                                <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px; font-family:var(--font-mono); font-size:10px;">
+                                    <div style="display:flex; justify-content:space-between;"><span>[Q1 2024] Prototype Hull Launch</span><span class="badge badge-green">DONE</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>[Q2 2024] Autonomous Trial (River)</span><span class="badge badge-green">DONE</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>[Q3 2024] Open Sea Trials</span><span class="badge badge-amber">IN PROGRESS</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>[Q4 2024] Customer Delivery v1.0</span><span class="badge badge-cyan">PLANNED</span></div>
+                                    <div style="display:flex; justify-content:space-between;"><span>[Q1 2025] Series A Fundraise</span><span class="badge badge-cyan">PLANNED</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Doc & Knowledge Base -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="file-text"></i> Documentation &amp; Knowledge Base</span>
+                        </div>
+                        <div class="panel-body" style="display:flex; flex-direction:column; gap:10px;">
+                            <div style="font-family:var(--font-mono); font-size:10px; display:flex; flex-direction:column; gap:6px;">
+                                <div style="padding:6px 8px; background:rgba(0,240,255,0.02); border:1px solid var(--border-color); border-radius:3px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>APEX-USV-01 Technical Design Report v3.2</span>
+                                    <button style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:14px;">⬇</button>
+                                </div>
+                                <div style="padding:6px 8px; background:rgba(0,240,255,0.02); border:1px solid var(--border-color); border-radius:3px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>CFD Analysis Report — Open Ocean Test</span>
+                                    <button style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:14px;">⬇</button>
+                                </div>
+                                <div style="padding:6px 8px; background:rgba(0,240,255,0.02); border:1px solid var(--border-color); border-radius:3px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>FEA Structural Certification Report</span>
+                                    <button style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:14px;">⬇</button>
+                                </div>
+                                <div style="padding:6px 8px; background:rgba(0,240,255,0.02); border:1px solid var(--border-color); border-radius:3px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>BOM Rev 4.0 — Procurement Package</span>
+                                    <button style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:14px;">⬇</button>
+                                </div>
+                                <div style="padding:6px 8px; background:rgba(0,240,255,0.02); border:1px solid var(--border-color); border-radius:3px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>ROS2 Navigation Stack — Configuration Guide</span>
+                                    <button style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:14px;">⬇</button>
+                                </div>
+                                <div style="padding:6px 8px; background:rgba(0,240,255,0.02); border:1px solid var(--border-color); border-radius:3px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>Autonomous Trials — Video &amp; Data Log</span>
+                                    <button style="background:none; border:none; color:var(--accent-cyan); cursor:pointer; font-size:14px;">⬇</button>
+                                </div>
+                            </div>
+
+                            <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:auto;">
+                                <button class="btn-primary" style="width:100%;">
+                                    <i data-lucide="file-plus"></i> Generate AI Engineering Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Terminal Console Logger Ticker (Shared across dashboard) -->
+        <footer class="app-console">
+            <div class="console-header">
+                <div class="console-title"><i data-lucide="terminal"></i> SYSTEM CONSOLE LOG</div>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">APEX-OS v4.2.1 | OpenCascade 7.7 | ROS2 Humble | OpenFOAM v10</span>
+                    <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan);" id="live-time-ticker">10:05:45</div>
+                </div>
+            </div>
+            <div class="console-log-list" id="console-logs">
+                <div class="log-entry">
+                    <span class="log-time">[00:00:00]</span>
+                    <span class="log-level info">INFO</span>
+                    <span class="log-msg">APEX-OS Kernel v4.2.1 loading...</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- JS CDN Scripts Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/occt-import-js@0.0.12/dist/occt-import-js.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Main Controller Logic JS Modules -->
+    <script src="js/main.js"></script>
+    <script src="js/cad.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/mission.js"></script>
+    <script src="js/procure.js"></script>
+    <script src="js/fc.js"></script>
+    <script src="js/telemetry.js"></script>
+    <script src="js/simulation.js"></script>
+    <script src="js/manufacturing.js"></script>
+    <script src="js/sap.js"></script>
+</body>
+</html>
