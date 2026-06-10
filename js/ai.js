@@ -682,17 +682,30 @@
     };
 
     // ── Default BOM ──────────────────────────────────────────────────────────
-    window.deleteBOMRow = async (id) => {
-        try {
-            const res = await fetch(`${APEX.apiBase}/api/bom/${id}`, {
-                method: 'DELETE'
-            });
-            if (res.ok) {
-                ConsoleLog.ok(`BOM item ID ${id} deleted from MongoDB database.`);
-                populateBOM();
+    window.deleteBOMRow = async (id, btnElement) => {
+        if (id) {
+            try {
+                const res = await fetch(`${window.APEX?.apiBase || ''}/api/bom/${id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    if (window.ConsoleLog) window.ConsoleLog.ok(`BOM item ID ${id} deleted from database.`);
+                    populateBOM();
+                } else {
+                    throw new Error("API Error");
+                }
+            } catch(e) {
+                if (window.ConsoleLog) window.ConsoleLog.warn("Failed to delete item from database. Removing locally.");
+                if (btnElement) {
+                    const tr = btnElement.closest('tr');
+                    if (tr) tr.remove();
+                    updateBOMTotals();
+                }
             }
-        } catch(e) {
-            ConsoleLog.warn("Failed to delete item from database.");
+        } else if (btnElement) {
+            const tr = btnElement.closest('tr');
+            if (tr) tr.remove();
+            updateBOMTotals();
         }
     };
 
@@ -722,7 +735,7 @@
                     <td>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span class="badge badge-${badge}">${item.status}</span>
-                            <button onclick="deleteBOMRow(${item.id})" style="background:none; border:none; color:var(--accent-red); cursor:pointer; font-size:12px; margin-left:6px;">✕</button>
+                            <button onclick="deleteBOMRow(${item.id}, this)" style="background:none; border:none; color:var(--accent-red); cursor:pointer; font-size:12px; margin-left:6px;">✕</button>
                         </div>
                     </td>`;
                 tbody.appendChild(tr);
@@ -753,7 +766,12 @@
                     <td style="color:var(--accent-cyan)">₹${total.toLocaleString()}</td>
                     <td>${wt} kg</td>
                     <td>${lead}</td>
-                    <td><span class="badge badge-${badge}">${status}</span></td>`;
+                    <td>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="badge badge-${badge}">${status}</span>
+                            <button onclick="deleteBOMRow(null, this)" style="background:none; border:none; color:var(--accent-red); cursor:pointer; font-size:12px; margin-left:6px;">✕</button>
+                        </div>
+                    </td>`;
                 tbody.appendChild(tr);
             });
             updateBOMTotals();
