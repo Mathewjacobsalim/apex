@@ -623,6 +623,53 @@
         bindVendorScan();
         populateBOM();
 
+        // Manual BOM Add
+        document.getElementById('btn-manual-add-bom')?.addEventListener('click', async () => {
+            const nameEl = document.getElementById('bom-add-name');
+            const vendorEl = document.getElementById('bom-add-vendor');
+            const priceEl = document.getElementById('bom-add-price');
+            const qtyEl = document.getElementById('bom-add-qty');
+
+            const name = nameEl.value.trim();
+            const vendor = vendorEl.value.trim() || 'Unknown Vendor';
+            const price = parseFloat(priceEl.value) || 0;
+            const qty = parseInt(qtyEl.value) || 1;
+
+            if (!name) {
+                if (window.ConsoleLog) window.ConsoleLog.warn("BOM Add: Part Name is required.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${window.APEX?.apiBase || ''}/api/bom`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        spec: 'Manual Entry',
+                        vendor: vendor,
+                        qty: qty,
+                        unit_cost: price,
+                        weight: 0.1,
+                        lead_time: 'Unknown',
+                        status: 'IN STOCK'
+                    })
+                });
+                if (res.ok) {
+                    if (window.ConsoleLog) window.ConsoleLog.ok(`Manual item "${name}" added to BOM.`);
+                    nameEl.value = '';
+                    vendorEl.value = '';
+                    priceEl.value = '';
+                    qtyEl.value = '1';
+                    populateBOM();
+                } else {
+                    throw new Error("API Error");
+                }
+            } catch (e) {
+                if (window.ConsoleLog) window.ConsoleLog.error("Failed to add manual BOM item.");
+            }
+        });
+
         // PCB draw after brief delay
         setTimeout(drawPCB, 600);
     });

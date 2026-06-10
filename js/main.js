@@ -201,4 +201,62 @@ document.addEventListener('DOMContentLoaded', () => {
         ConsoleLog.info('Auto-calibration sequence initiated...');
         setTimeout(() => ConsoleLog.ok('IMU bias calibrated. ESC range: 1020–1980μs confirmed.'), 2000);
     });
+
+    // Admin SAP Integration
+    document.getElementById('btn-sap-save')?.addEventListener('click', async () => {
+        const host = document.getElementById('sap-host-input')?.value.trim();
+        const client = document.getElementById('sap-client-input')?.value.trim();
+        const user = document.getElementById('sap-user-input')?.value.trim();
+        const pass = document.getElementById('sap-pass-input')?.value.trim();
+        const msgEl = document.getElementById('sap-admin-msg');
+
+        if (!host || !user) {
+            if (msgEl) { msgEl.style.color = 'var(--accent-amber)'; msgEl.textContent = 'Please provide host URL and Username.'; }
+            return;
+        }
+
+        if (msgEl) { msgEl.style.color = 'var(--text-main)'; msgEl.textContent = 'Authenticating with SAP backend...'; }
+        
+        try {
+            const res = await fetch(`${window.APEX?.apiBase || ''}/api/sap/connect`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ host, client, user, pass })
+            });
+            const data = await res.json();
+            if (res.ok && data.status === 'success') {
+                if (msgEl) { msgEl.style.color = 'var(--accent-green)'; msgEl.textContent = 'SUCCESS: SAP Connection established and verified.'; }
+                ConsoleLog.ok(`SAP connected: ${host}`);
+            } else {
+                throw new Error(data.message || 'Connection failed');
+            }
+        } catch (e) {
+            if (msgEl) { msgEl.style.color = 'var(--accent-red)'; msgEl.textContent = 'ERROR: ' + e.message; }
+            ConsoleLog.error(`SAP connection failed: ${e.message}`);
+        }
+    });
+
+    // DB Admin Clear
+    document.getElementById('btn-admin-clear-db')?.addEventListener('click', async () => {
+        if (!confirm("WARNING: This will permanently delete ALL active BOM, Inventory, and Workflow records. Are you sure?")) return;
+        
+        const msgEl = document.getElementById('db-admin-msg');
+        if (msgEl) { msgEl.style.color = 'var(--text-main)'; msgEl.textContent = 'Clearing database collections...'; }
+        
+        try {
+            const res = await fetch(`${window.APEX?.apiBase || ''}/api/admin/clear-db`, { method: 'DELETE' });
+            if (res.ok) {
+                if (msgEl) { msgEl.style.color = 'var(--accent-green)'; msgEl.textContent = 'SUCCESS: All collections wiped.'; }
+                ConsoleLog.ok('Database successfully cleared by administrator.');
+                // Try to trigger a refresh of the BOM
+                if (window.APEX && window.APEX.modules && window.APEX.modules['procure-tab']) {
+                    window.APEX.modules['procure-tab'].onActivate();
+                }
+            } else {
+                throw new Error('Failed to wipe database');
+            }
+        } catch(e) {
+            if (msgEl) { msgEl.style.color = 'var(--accent-red)'; msgEl.textContent = 'ERROR: ' + e.message; }
+        }
+    });
 });

@@ -53,6 +53,9 @@
             <button class="tab-btn" data-tab="erp-tab">
                 <i data-lucide="bar-chart-2"></i> ERP &amp; Ops
             </button>
+            <button class="tab-btn" data-tab="admin-tab">
+                <i data-lucide="settings"></i> Admin Panel
+            </button>
         </nav>
 
         <div class="header-status">
@@ -716,6 +719,15 @@ M30 ; Program end
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Manual BOM Addition Form -->
+                        <div style="border-top: 1px solid var(--border-color); padding: 12px; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(0,0,0,0.2);">
+                            <input type="text" id="bom-add-name" class="control-input" placeholder="Part Name" style="flex:2;">
+                            <input type="text" id="bom-add-vendor" class="control-input" placeholder="Vendor" style="flex:1;">
+                            <input type="number" id="bom-add-price" class="control-input" placeholder="Unit Price (INR)" style="flex:1;" step="0.01">
+                            <input type="number" id="bom-add-qty" class="control-input" placeholder="Qty" style="width:60px;" value="1">
+                            <button class="btn-primary" id="btn-manual-add-bom" style="padding: 6px 12px;"><i data-lucide="plus"></i> Add Item</button>
+                        </div>
                     </div>
 
                     <!-- Right: Smart URL scanner and components checker -->
@@ -1165,6 +1177,69 @@ M30 ; Program end
                                     <i data-lucide="file-plus"></i> Generate AI Engineering Report
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin & System Config Tab -->
+            <section id="admin-tab" class="tab-content">
+                <div class="split-layout-2">
+                    <!-- Left: SAP Config -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="server"></i> SAP &amp; Team Connectivity Settings</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="control-group">
+                                <label class="control-label">SAP Host URL</label>
+                                <input type="text" class="control-input" id="sap-host-input" placeholder="https://api.sap.com/s4hana/...">
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">SAP Client ID / Project ID</label>
+                                <input type="text" class="control-input" id="sap-client-input" placeholder="e.g., APEX-TEAM-01">
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">SAP Username / Access Key</label>
+                                <input type="text" class="control-input" id="sap-user-input" placeholder="Service Account Username">
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">SAP Password / Secret</label>
+                                <input type="password" class="control-input" id="sap-pass-input" placeholder="••••••••••••">
+                            </div>
+                            
+                            <div style="display:flex; justify-content: space-between; align-items:center; margin-top: 15px;">
+                                <label style="font-size: 10px; color: var(--text-secondary);"><input type="checkbox" id="sap-sync-enable" checked> Enable Auto-Sync to Team Project</label>
+                                <button class="btn-primary" id="btn-sap-save">
+                                    <i data-lucide="save"></i> Save Credentials &amp; Test Sync
+                                </button>
+                            </div>
+                            <div id="sap-admin-msg" style="margin-top:10px; font-size:10px; font-family:var(--font-mono); color:var(--accent-cyan);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: DB Admin -->
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="database"></i> Database Management &amp; Cleanup</span>
+                        </div>
+                        <div class="panel-body">
+                            <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px;">
+                                Use these utilities to manage the APEX-OS local MongoDB instances. Clearing the database will permanently delete the active records in the selected collections. This is useful for starting a new project.
+                            </p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.2); border-radius: 4px;">
+                                    <div>
+                                        <strong style="font-size:11px; color:var(--text-main);">Clear All Production Data</strong><br>
+                                        <span style="font-size:10px; color:var(--text-muted);">Deletes BOM, Inventory, and Workflows completely.</span>
+                                    </div>
+                                    <button class="btn-primary" id="btn-admin-clear-db" style="background:var(--accent-red); border-color:var(--accent-red);">
+                                        <i data-lucide="trash-2"></i> Wipe Database
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="db-admin-msg" style="margin-top:15px; font-size:10px; font-family:var(--font-mono); color:var(--accent-red);"></div>
                         </div>
                     </div>
                 </div>

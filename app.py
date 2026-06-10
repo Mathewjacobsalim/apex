@@ -708,13 +708,32 @@ def mfg_slice_stl():
         traceback.print_exc()
         return jsonify({"status": "error", "message": f"Slicing failed: {str(e)}"}), 500
 
+# ── Admin Utilities ────────────────────────────────────────────────────────
+@app.route("/api/admin/clear-db", methods=["DELETE"])
+def clear_db():
+    if not IS_OFFLINE:
+        try:
+            mongo_db.inventory.delete_many({})
+            mongo_db.bom.delete_many({})
+            mongo_db.workflows.delete_many({})
+            return jsonify({"status": "success", "message": "Database collections cleared."})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    else:
+        return jsonify({"status": "success", "message": "Offline mode: simulated clear."})
+
+
 # ── SAP ERP S/4HANA Integration (Simulated) ────────────────────────────────
 @app.route("/api/sap/connect", methods=["POST"])
 def sap_connect():
+    data = request.json or {}
+    host = data.get("host", "Unknown Host")
+    user = data.get("user", "Unknown User")
+    
     time.sleep(1.5)
     return jsonify({
         "status": "success",
-        "message": "Connected to SAP S/4HANA Cloud (Client 100)",
+        "message": f"Connected to {host} as {user}",
         "sap_version": "S/4HANA 2023"
     })
 
