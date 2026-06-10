@@ -388,12 +388,12 @@ def ai_chat():
         ]
         params = { 'drone-arm': 380, 'drone-hub': 150 }
     else:
-        title = "AI Co-Engineer Analysis"
+        title = "AI Co-Engineer (Offline Mode)"
         steps = [
-            f"→ [Local Core] Scanning request: '{query or cmd}'",
-            "→ Checking material properties database (Aluminum 5083, Carbon Twill 3K)...",
-            "→ Structural validation matches ISO 12215 rules.",
-            "✓ Proceed with optimized layout. DXF toolpaths validated."
+            f"→ Request received: '{query or cmd}'",
+            "→ Warning: No active AI connection detected (GEMINI_API_KEY missing).",
+            "→ I can only respond to specific engineering commands right now.",
+            "✓ Please configure a valid API key to unlock full chat capabilities."
         ]
         params = {}
         
